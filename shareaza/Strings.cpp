@@ -21,6 +21,17 @@
 
 #include "StdAfx.h"
 #include "Strings.h"
+#include <windns.h>
+
+#ifndef ASSERT
+#ifdef _DEBUG
+
+#define ASSERT(x)  if(!(x)) DebugBreak()
+
+#else
+#define ASSERT(x)
+#endif
+#endif
 
 bool IsCharacter(const WCHAR nChar)
 {

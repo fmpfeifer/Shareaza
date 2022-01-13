@@ -781,6 +781,8 @@ BOOL CG2Packet::OnPacket(const SOCKADDR_IN6* pHost)
 			(LPCTSTR)IPv6ToString( &pHost->sin6_addr ) ,
 			htons( pHost->sin6_port ) );
 		Debug( tmp );
+#else
+		break;
 #endif // _DEBUG
 	}
 
