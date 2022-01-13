@@ -58,6 +58,8 @@
 #include "CtrlDownloads.h"
 #include "CtrlUploads.h"
 
+#include "ShareazaSpy.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -537,17 +539,34 @@ void CRemote::PageSearch()
 	
 	_stscanf( GetKey( _T("id") ), _T("%Ii"), &nSearchID );
 	_stscanf( GetKey( _T("close") ), _T("%Ii"), &nCloseID );
+
+	CString closeTerm = GetKey(_T("closeterm"));
+
+	bool closeTermPassed = closeTerm.GetLength() > 0;
+	closeTerm += _T(" ");
 	
 	Prepare();
 	Output( _T("searchHeader") );
+
+	if ( closeTermPassed ) {
+		SaveSearchesNow("Searches.dat");
+	}
 	
 	for ( CSearchWnd* pFindWnd = NULL ; ( pFindWnd = static_cast< CSearchWnd* >( pMainWnd->m_pWindows.Find( RUNTIME_CLASS(CSearchWnd), pFindWnd ) ) ) != NULL ; )
 	{
 		Prepare();
 		INT_PTR nFindWnd = reinterpret_cast< INT_PTR >( pFindWnd );
+		CString caption = _T("");
+		if (pFindWnd != NULL) {
+			caption = pFindWnd->GetCaption() + _T(" ");
+		}
 		if ( nCloseID == nFindWnd )
 		{
 			pFindWnd->PostMessage( WM_CLOSE );
+			continue;
+		}
+		if (pFindWnd != NULL && closeTermPassed && caption.Find(closeTerm) != -1) {
+			pFindWnd->PostMessage(WM_CLOSE);
 			continue;
 		}
 		else if ( nSearchID == nFindWnd )

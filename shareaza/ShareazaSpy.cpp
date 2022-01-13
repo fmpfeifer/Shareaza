@@ -1,4 +1,9 @@
 #include "ShareazaSpy.h"
+#include "Shareaza.h"
+#include "QuerySearch.h"
+#include "QueryHit.h"
+#include "WndMain.h"
+#include "WndSearch.h"
 
 #include <ctime>
 #include <fstream>
@@ -75,4 +80,67 @@ void LogReceivedPackage(SOCKADDR_IN* addr)
 	logFile << logline << std::endl;
 	logCount++;
 	logCache.insert(logline, 0);
+}
+
+bool SaveSearchesNow(const char* fileName) {
+	CString strFile = _T(SHAREAZA_SPY_OUTPUT_FOLDER);
+	strFile += _T("\\");
+	strFile += fileName;
+
+	CFile pFile;
+
+	if (!pFile.Open(strFile, CFile::modeWrite | CFile::modeCreate | CFile::shareExclusive | CFile::osSequentialScan))
+	{
+		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+		return FALSE;
+	}
+	CMainWnd* pMainWnd = static_cast< CMainWnd* >(theApp.m_pMainWnd);
+
+	try
+	{
+		CArchive ar(&pFile, CArchive::store, 262144);	// 256 KB buffer
+		try
+		{
+			DWORD nTotal = 0;
+			for (POSITION pos = pMainWnd->m_pWindows.GetIterator(); pos; )
+			{
+				CSearchWnd* pWnd = (CSearchWnd*)pMainWnd->m_pWindows.GetNext(pos);
+				if (pWnd->IsKindOf(RUNTIME_CLASS(CSearchWnd)) &&
+					pWnd->GetLastSearch())
+				{
+					++nTotal;
+				}
+			}
+
+			for (POSITION pos = pMainWnd->m_pWindows.GetIterator(); pos; )
+			{
+				CSearchWnd* pWnd = (CSearchWnd*)pMainWnd->m_pWindows.GetNext(pos);
+				if (pWnd->IsKindOf(RUNTIME_CLASS(CSearchWnd)) &&
+					pWnd->GetLastSearch())
+				{
+					ar.WriteCount(1);
+					pWnd->Serialize(ar);
+				}
+			}
+			ar.WriteCount(0);
+			ar.Close();
+		}
+		catch (CException* pException)
+		{
+			ar.Abort();
+			pFile.Abort();
+			pException->Delete();
+			theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+			return FALSE;
+		}
+		pFile.Close();
+	}
+	catch (CException* pException)
+	{
+		pFile.Abort();
+		pException->Delete();
+		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+		return FALSE;
+	}
+	return TRUE;
 }
