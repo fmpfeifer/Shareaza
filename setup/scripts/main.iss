@@ -31,7 +31,7 @@
 
 ; Set "1" for release and "0" for alpha, beta, etc. daily builds
 #ifndef RELEASE_BUILD
-	#define RELEASE_BUILD 0
+	#define RELEASE_BUILD 1
 #endif
 
 ; Test for VS2010
@@ -286,7 +286,7 @@ WizardSmallImageFile=setup\misc\corner.bmp
 ChangesAssociations=yes
 ChangesEnvironment=yes
 OutputManifestFile=Manifest_{#ConfigurationName}{#PlatformName}.txt
-MinVersion=5.0
+MinVersion=6.0
 #if PlatformName == "x64"
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
@@ -298,7 +298,7 @@ SourceDir={#SourcePath}..\..
 VersionInfoVersion={#version}
 VersionInfoDescription={#Description}
 AppPublisher={#Publisher}
-AppCopyright=Copyright © {#Publisher}. All rights reserved.
+AppCopyright=Copyright ï¿½ {#Publisher}. All rights reserved.
 
 ; Links to website for software panel
 AppPublisherURL=http://shareaza.sourceforge.net/
