@@ -543,6 +543,7 @@ void CRemote::PageSearch()
 	CString closeTerm = GetKey(_T("closeterm"));
 
 	bool closeTermPassed = closeTerm.GetLength() > 0;
+	bool closeAll = closeTerm == _T("*all*");
 	closeTerm += _T(" ");
 	
 	Prepare();
@@ -556,13 +557,19 @@ void CRemote::PageSearch()
 	{
 		Prepare();
 		INT_PTR nFindWnd = reinterpret_cast< INT_PTR >( pFindWnd );
+
+		if (closeAll) {
+			pFindWnd->PostMessage(WM_CLOSE);
+			continue;
+		}
+
 		CString caption = _T("");
 		if (pFindWnd != NULL) {
 			caption = pFindWnd->GetCaption() + _T(" ");
 		}
 		if ( nCloseID == nFindWnd )
 		{
-			pFindWnd->PostMessage( WM_CLOSE );
+			pFindWnd->PostMessage(WM_CLOSE);
 			continue;
 		}
 		if (pFindWnd != NULL && closeTermPassed && caption.Find(closeTerm) != -1) {
