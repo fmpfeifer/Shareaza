@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "ShareazaSpy.h"
 #include "Shareaza.h"
 #include "QuerySearch.h"

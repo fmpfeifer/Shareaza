@@ -456,6 +456,7 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="ShakeNeighbour.cpp" />
     <ClCompile Include="Shareaza.cpp" />
+    <ClCompile Include="ShareazaSpy.cpp" />
     <ClCompile Include="Shareaza_i.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -865,6 +866,7 @@
     <ClInclude Include="ShareazaDataSource.h" />
     <ClInclude Include="ShareazaFile.h" />
     <ClInclude Include="ShareazaOM.h" />
+    <ClInclude Include="ShareazaSpy.h" />
     <ClInclude Include="ShareazaThread.h" />
     <ClInclude Include="ShareazaURL.h" />
     <ClInclude Include="SharedFile.h" />

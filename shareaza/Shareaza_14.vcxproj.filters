@@ -1146,6 +1146,9 @@
     <ClCompile Include="ZLibWarp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShareazaSpy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Shareaza.idl">
@@ -2306,6 +2309,9 @@
     </ClInclude>
     <ClInclude Include="ZLibWarp.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShareazaSpy.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
