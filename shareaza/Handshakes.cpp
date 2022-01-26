@@ -34,6 +34,7 @@
 #include "DiscoveryServices.h"
 #include "Transfers.h"
 #include "Uploads.h"
+#include "ShareazaSpy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -397,6 +398,8 @@ BOOL CHandshakes::AcceptConnection()
 		hSocket,							// The local socket we just made when accepting a new connection
 		GetWakeupEvent(),					// The handshakes object's wakeup event
 		FD_READ | FD_WRITE | FD_CLOSE );	// Make the event happen when the socket is ready to read, write, or has closed
+
+	LogReceivedPackage(&pHost, TYPE_TCP);
 
 	if ( CHandshake* pHandshake = new CHandshake( hSocket, &pHost ) )
 	{

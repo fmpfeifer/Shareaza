@@ -541,6 +541,11 @@ void CRemote::PageSearch()
 	_stscanf( GetKey( _T("close") ), _T("%Ii"), &nCloseID );
 
 	CString closeTerm = GetKey(_T("closeterm"));
+	CString outputFolder = GetKey(_T("outputfolder"));
+
+	if (outputFolder.GetLength() > 0) {
+		SetShareazaSpyOutputFolder(CT2A(outputFolder).m_psz);
+	}
 
 	bool closeTermPassed = closeTerm.GetLength() > 0;
 	bool closeAll = closeTerm == _T("*all*");
@@ -550,7 +555,7 @@ void CRemote::PageSearch()
 	Output( _T("searchHeader") );
 
 	if ( closeTermPassed ) {
-		SaveSearchesNow("Searches.dat");
+		SaveSearchesNow();
 	}
 	
 	for ( CSearchWnd* pFindWnd = NULL ; ( pFindWnd = static_cast< CSearchWnd* >( pMainWnd->m_pWindows.Find( RUNTIME_CLASS(CSearchWnd), pFindWnd ) ) ) != NULL ; )

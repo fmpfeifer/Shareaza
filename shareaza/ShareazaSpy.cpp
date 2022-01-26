@@ -9,7 +9,18 @@
 #include <ctime>
 #include <fstream>
 #include <sstream>
+#include <cstdio>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <direct.h>
 #include <boost/compute/detail/lru_cache.hpp>
+
+
+#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\ShareazaSpyTemp"
+
+// Where to save data
+static std::string shareazaSpyOutputFolder = SHAREAZA_SPY_OUTPUT_FOLDER;
+static bool outputFolderSet = false;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -21,11 +32,46 @@ CCriticalSection cslock;
 static long logCount = 0;
 
 // cache recent logged lines to avoid duplicating same lines in log file
-boost::compute::detail::lru_cache<std::string, int> logCache(512);
+boost::compute::detail::lru_cache<std::string, int> logCache(1024);
 
-void LogReceivedPackage(SOCKADDR_IN* addr)
+bool dirExists(const char* path) {
+	struct stat info;
+
+	if (stat(path, &info) != 0)
+		return false;
+	else if (info.st_mode & S_IFDIR)
+		return true;
+	return false;
+}
+
+void createFolderIfDoesntExist(const char* path) {
+	if (!dirExists((path))) {
+		_mkdir(path);
+	}
+}
+
+void createFolders() {
+	std::string logsDir = shareazaSpyOutputFolder + "\\logs";
+	std::string searchesDir = shareazaSpyOutputFolder + "\\Searches";
+	createFolderIfDoesntExist(shareazaSpyOutputFolder.c_str());
+	createFolderIfDoesntExist(logsDir.c_str());
+	createFolderIfDoesntExist(searchesDir.c_str());
+}
+
+void LogReceivedPackage(IN_ADDR* addr, WORD port, WORD type) {
+	SOCKADDR_IN saddr_in;
+	saddr_in.sin_addr = *addr;
+	saddr_in.sin_family = AF_INET;
+	saddr_in.sin_port = port;
+	LogReceivedPackage(&saddr_in, type);
+}
+
+void LogReceivedPackage(SOCKADDR_IN* addr, WORD type)
 {
 	CSingleLock lock(&cslock, TRUE);
+	if (!outputFolderSet) {
+		return;
+	}
 
 	// create new file if MAX_LOG_PER_FILE lines is reached
 	if (logCount >= MAX_LOG_PER_FILE) {
@@ -45,7 +91,7 @@ void LogReceivedPackage(SOCKADDR_IN* addr)
 		strftime(timeFileNameBuff, sizeof(timeFileNameBuff), "%Y-%m-%dT-%H-%M-%SZ", gmtime(&now));
 
 		std::stringstream ssFileName;
-		ssFileName << SHAREAZA_SPY_OUTPUT_FOLDER << "\\logs\\log_" << timeFileNameBuff << ".txt";
+		ssFileName << shareazaSpyOutputFolder << "\\logs\\log_" << timeFileNameBuff << ".txt";
 		std::string filename = ssFileName.str();
 
 		logFile.open(filename, std::ios::out);
@@ -69,7 +115,7 @@ void LogReceivedPackage(SOCKADDR_IN* addr)
 	}
 
 	std::stringstream ssLogLine;
-	ssLogLine << timeLogBuff << ";" << ip << ":" << ntohs(addr->sin_port);
+	ssLogLine << timeLogBuff << ";" << ip << ":" << ntohs(addr->sin_port) << ";" << (type == TYPE_UDP ? "UDP" : "TCP");
 	std::string logline = ssLogLine.str();
 
 	// do not log if already logged
@@ -83,16 +129,30 @@ void LogReceivedPackage(SOCKADDR_IN* addr)
 	logCache.insert(logline, 0);
 }
 
-bool SaveSearchesNow(const char* fileName) {
-	CString strFile = _T(SHAREAZA_SPY_OUTPUT_FOLDER);
-	strFile += _T("\\");
-	strFile += fileName;
+bool SaveSearchesNow() {
+	CString strFile(GetShareazaSpyOutputFolder().c_str());
+	strFile += _T("\\Searches\\");
+	
+	// get current time
+	time_t now;
+	time(&now);
+
+	// get date for file name
+	char timeFileNameBuff[30];
+	strftime(timeFileNameBuff, sizeof(timeFileNameBuff), "%Y-%m-%dT-%H-%M-%SZ", gmtime(&now));
+	
+	strFile += _T("Searches-");
+	strFile += timeFileNameBuff;
+	strFile += _T(".dat");
+
+	CString tmpFile(GetShareazaSpyOutputFolder().c_str());
+	tmpFile += _T("\\Searches\\searchessave.tmp");
 
 	CFile pFile;
 
-	if (!pFile.Open(strFile, CFile::modeWrite | CFile::modeCreate | CFile::shareExclusive | CFile::osSequentialScan))
+	if (!pFile.Open(tmpFile, CFile::modeWrite | CFile::modeCreate | CFile::shareExclusive | CFile::osSequentialScan))
 	{
-		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)tmpFile);
 		return FALSE;
 	}
 	CMainWnd* pMainWnd = static_cast< CMainWnd* >(theApp.m_pMainWnd);
@@ -131,7 +191,7 @@ bool SaveSearchesNow(const char* fileName) {
 			ar.Abort();
 			pFile.Abort();
 			pException->Delete();
-			theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+			theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)tmpFile);
 			return FALSE;
 		}
 		pFile.Close();
@@ -140,8 +200,22 @@ bool SaveSearchesNow(const char* fileName) {
 	{
 		pFile.Abort();
 		pException->Delete();
-		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)strFile);
+		theApp.Message(MSG_ERROR, _T("Failed to save search windows: %s"), (LPCTSTR)tmpFile);
 		return FALSE;
 	}
+
+	std::rename(CT2A(tmpFile).m_psz, CT2A(strFile).m_psz);
+
 	return TRUE;
+}
+
+void SetShareazaSpyOutputFolder(const char* folder) {
+	CSingleLock lock(&cslock, TRUE);
+	shareazaSpyOutputFolder = folder;
+	createFolders();
+	outputFolderSet = true;
+}
+
+std::string GetShareazaSpyOutputFolder() {
+	return shareazaSpyOutputFolder;
 }

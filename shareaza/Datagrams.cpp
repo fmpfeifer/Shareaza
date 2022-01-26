@@ -880,7 +880,7 @@ BOOL CDatagrams::TryRead(int nIndex)
 	SOCKADDR_IN pFrom = {};
 	int nLength	= CNetwork::RecvFrom( m_hSocket[ nIndex ], (char*)m_pReadBuffer, sizeof( m_pReadBuffer ) - 1, &pFrom );
 
-	LogReceivedPackage(&pFrom);
+	LogReceivedPackage(&pFrom, TYPE_UDP);
 
 	if ( nLength < 1 )
 		return FALSE;

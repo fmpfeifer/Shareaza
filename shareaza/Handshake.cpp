@@ -42,6 +42,7 @@
 #include "Uploads.h"
 #include "WndChat.h"
 #include "WndMain.h"
+#include "ShareazaSpy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -125,6 +126,8 @@ BOOL CHandshake::Push(IN_ADDR* pAddress, WORD nPort, DWORD nIndex)
 
 	// Connect the socket in this CHandshake object to the IP address and port number the method got passed
 	if ( ! ConnectTo( pAddress, nPort ) ) return FALSE; // If the connection was not made, leave now
+
+	LogReceivedPackage(pAddress, nPort, TYPE_TCP);
 
 	// Tell Windows to give us a m_pWakeup event if this socket connects, gets data, is ready for writing, or closes
 	WSAEventSelect(				// Specify our event object Handshakes.m_pWakeup to the FD_CONNECT FD_READ FD_WRITE and FD_CLOSE events
