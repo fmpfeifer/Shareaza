@@ -542,9 +542,16 @@ void CRemote::PageSearch()
 
 	CString closeTerm = GetKey(_T("closeterm"));
 	CString outputFolder = GetKey(_T("outputfolder"));
+	CString closeProgram = GetKey(_T("closeprogram"));
 
 	if (outputFolder.GetLength() > 0) {
 		SetShareazaSpyOutputFolder(CT2A(outputFolder).m_psz);
+	}
+
+	if (closeProgram.GetLength() > 0) {
+		if (theApp.SafeMainWnd() != NULL) {
+			theApp.SafeMainWnd()->PostMessage(WM_CLOSE);
+		}
 	}
 
 	bool closeTermPassed = closeTerm.GetLength() > 0;
