@@ -543,6 +543,7 @@ void CRemote::PageSearch()
 	CString closeTerm = GetKey(_T("closeterm"));
 	CString outputFolder = GetKey(_T("outputfolder"));
 	CString closeProgram = GetKey(_T("closeprogram"));
+	CString saveSearches = GetKey(_T("savesearches"));
 
 	if (outputFolder.GetLength() > 0) {
 		SetShareazaSpyOutputFolder(CT2A(outputFolder).m_psz);
@@ -561,7 +562,7 @@ void CRemote::PageSearch()
 	Prepare();
 	Output( _T("searchHeader") );
 
-	if ( closeTermPassed ) {
+	if (saveSearches.GetLength() > 0) {
 		SaveSearchesNow();
 	}
 	
