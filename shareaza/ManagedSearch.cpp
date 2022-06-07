@@ -41,6 +41,7 @@
 #include "Download.h"
 #include "DownloadSource.h"
 #include "Transfers.h"
+#include "ShareazaSpy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -221,7 +222,7 @@ BOOL CManagedSearch::Execute(int nPriorityClass)
 	if ( Settings.eDonkey.EnableToday &&
 		 Settings.eDonkey.ServerWalk &&
 		 m_bAllowED2K &&
-		 tTicks > m_tLastED2K + Settings.eDonkey.QueryGlobalThrottle &&
+		 // tTicks > m_tLastED2K + Settings.eDonkey.QueryGlobalThrottle &&
 		 Network.IsListening() &&
 		 ( m_pSearch->m_oED2K || IsLastSearch() ) )
 	{
@@ -392,6 +393,11 @@ BOOL CManagedSearch::ExecuteNeighbours(const DWORD tTicks, const DWORD tSecs)
 					{
 						// Save GUID of latest text search
 						SearchManager.m_oLastSearch = m_pSearch->m_oGUID;
+					}
+					LogDebugMessage("Sending Neighbour ED2K query to ", &Network.m_pHost);
+					if (true) {
+						CT2A ascii(m_pSearch->m_sSearch);
+						LogDebugMessage("Query: ", ascii.m_psz);
 					}
 					break;
 				case PROTOCOL_DC:
@@ -817,6 +823,9 @@ BOOL CManagedSearch::ExecuteDonkeyMesh(const DWORD /*tTicks*/, const DWORD tSecs
 				theApp.Message( MSG_DEBUG | MSG_FACILITY_SEARCH,
 					_T("Sending UDP query to %s"),
 					(LPCTSTR)CString( inet_ntoa( pHost->m_pAddress ) ) );
+				LogDebugMessage("Sending ED2K query to ", &pHost->m_pAddress, pHost->m_nPort + 4);
+				CT2A ascii(m_pSearch->m_sSearch);
+				LogDebugMessage("Query: ", ascii.m_psz);
 				return TRUE;
 			}
 		}

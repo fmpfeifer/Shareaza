@@ -38,6 +38,7 @@
 #include "VendorCache.h"
 #include "RouteCache.h"
 #include "Security.h"
+#include "ShareazaSpy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -55,6 +56,8 @@ CQueryHit::CQueryHit(PROTOCOLID nProtocol, const Hashes::Guid& oSearchID) :
 	m_pAddress		(),
 	m_pAddressIPv6	(),
 	m_nPort			( 0 ),
+	m_nRealPort		( 0 ),
+	m_bUDP	        ( FALSE ),
 	m_nSpeed		( 0 ),
 	m_pVendor		( VendorCache.m_pNull ),
 	m_bPush			( TRI_UNKNOWN ),
@@ -147,9 +150,14 @@ CQueryHit* CQueryHit::FromG1Packet(CG1Packet* pPacket, int* pnHops)
 				AfxThrowMemoryException();
 
 			pHit->m_pAddress	= (IN_ADDR&)nAddress;
+			pHit->m_nRealPort   = pPacket->m_nPort;
+			pHit->m_bUDP        = pPacket->m_bUDP;
 			pHit->m_sCountry	= theApp.GetCountryCode( pHit->m_pAddress );
 			pHit->m_nPort		= nPort;
 			pHit->m_nSpeed		= nSpeed;
+
+			LogDebugMessage("QH from G1Packet. Port: ", (long) pHit->m_nPort);
+			LogDebugMessage("QH from G1Packet. Real Port: ", (long) pHit->m_nRealPort);
 
 			pHit->ReadG1Packet( pPacket );
 
@@ -658,6 +666,11 @@ CQueryHit* CQueryHit::FromG2Packet(CG2Packet* pPacket, int* pnHops)
 		pHit->m_bBrowseHost	= bBrowseHost;
 		pHit->m_sNick		= strNick;
 		pHit->m_bPreview	&= pHit->m_bPush == TRI_FALSE;
+		pHit->m_nRealPort   = pPacket->m_nPort;
+		pHit->m_bUDP        = pPacket->m_bUDP;
+
+		LogDebugMessage("QH from G2Packet. Port: ", (long) pHit->m_nPort);
+		LogDebugMessage("QH from G2Packet. Real Port: ", (long) pHit->m_nRealPort);
 
 		if ( pHit->m_nUpSlots > 0 )
 		{
@@ -1965,6 +1978,8 @@ CQueryHit& CQueryHit::operator=(const CQueryHit& pOther)
 	m_oMD5			= pOther.m_oMD5;
 	m_sPath			= pOther.m_sPath;
 	m_sURL			= pOther.m_sURL;
+	m_nRealPort     = pOther.m_nRealPort;
+	m_bUDP          = pOther.m_bUDP;
 
 	return *this;
 }
@@ -2052,6 +2067,8 @@ void CQueryHit::Serialize(CArchive& ar, int nVersion /* MATCHLIST_SER_VERSION */
 		ar << m_bBogus;
 		ar << m_bDownload;
 		ar << m_sNick;
+		ar << m_nRealPort;
+		ar << m_bUDP;
 	}
 	else
 	{
@@ -2131,6 +2148,10 @@ void CQueryHit::Serialize(CArchive& ar, int nVersion /* MATCHLIST_SER_VERSION */
 		ar >> m_bBogus;
 		ar >> m_bDownload;
 		if ( nVersion >= 15 ) ar >> m_sNick;
+		if ( nVersion >= 18 ) {
+			ar >> m_nRealPort;
+			ar >> m_bUDP;
+		}
 
 		if ( m_nHitSources == 0 && m_sURL.GetLength() ) m_nHitSources = 1;
 	}

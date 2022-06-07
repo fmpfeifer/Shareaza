@@ -31,6 +31,7 @@
 #include "Buffer.h"
 #include "WndMain.h"
 #include "WndPacket.h"
+#include "ShareazaSpy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -59,6 +60,7 @@ CPacket::CPacket(PROTOCOLID nProtocol)
 	, m_bUDP	   ( FALSE )
 	, m_bOutgoing  ( FALSE )
 	, m_nNeighbourUnique	( NULL )
+	, m_nPort 	   ( 0 )
 {
 }
 
@@ -461,6 +463,8 @@ void CPacket::SmartDump(const SOCKADDR_IN* pAddress, BOOL bUDP, BOOL bOutgoing, 
 	m_bUDP = bUDP;
 	m_bOutgoing = bOutgoing;
 	m_nNeighbourUnique = nNeighbourUnique;
+	m_nPort = ntohs(pAddress->sin_port);
+	LogDebugMessage("SmartDump: ", pAddress);
 
 	if ( theApp.m_pPacketWnd )
 	{
@@ -473,6 +477,7 @@ void CPacket::SmartDump(const SOCKADDR_IN6* pAddress, BOOL bUDP, BOOL bOutgoing,
 	m_bUDP = bUDP;
 	m_bOutgoing = bOutgoing;
 	m_nNeighbourUnique = nNeighbourUnique;
+	m_nPort = ntohs(pAddress->sin6_port);
 
 	if ( theApp.m_pPacketWnd )
 	{

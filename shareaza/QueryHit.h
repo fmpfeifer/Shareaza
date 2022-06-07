@@ -54,6 +54,8 @@ public:
 	IN6_ADDR		m_pAddressIPv6;
 	CString			m_sCountry;
 	WORD			m_nPort;
+	WORD			m_nRealPort;
+	BOOL			m_bUDP;
 	DWORD			m_nSpeed;
 	CString			m_sSpeed;
 	CVendorPtr		m_pVendor;
