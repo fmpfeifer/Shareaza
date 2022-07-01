@@ -14,6 +14,10 @@
   #define root "vc8_0\release"
   #define version GetFileVersion("..\..\vc8_0\release\Shareaza.exe")
 #endif
+#ifexist "..\..\vc\release\Shareaza.exe"
+  #define root "vc\release"
+  #define version GetFileVersion("..\..\vc\release\Shareaza.exe")
+#endif
 
 #ifndef root
   #error You must compile Shareaza before compile the repair

@@ -15,6 +15,10 @@
   #define root "vc10\Win32\Release"
   #define version GetFileVersion("..\..\vc10\Win32\Release\TorrentWizard.exe")
 #endif
+#ifexist "..\..\vc\Win32\Release\TorrentWizard.exe"
+  #define root "vc\Win32\Release"
+  #define version GetFileVersion("..\..\vc10\Win32\Release\TorrentWizard.exe")
+#endif
 
 #ifndef root
   #error You must compile TorrentWizard before compile the setup
