@@ -234,7 +234,7 @@ private:
 
 extern CCoolInterface CoolInterface;
 
-typedef struct
+typedef struct TOOLBAR_RES_STRUCT
 {
 	WORD wVersion;
 	WORD wWidth;

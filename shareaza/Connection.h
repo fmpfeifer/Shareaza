@@ -309,7 +309,7 @@ public:
 	static const DWORD	METER_PERIOD	= METER_MINIMUM * METER_LENGTH;	// The time that the bandwidth meter keeps information for
 
 	// Keep track of how fast we are reading or writing bytes to a socket
-	typedef struct
+	typedef struct TCPBandwidthMeterStruct
 	{
 		// Options to limit bandwidth
 		DWORD*	pLimit;		// Points to a DWORD that holds the limit for this bandwidth meter
