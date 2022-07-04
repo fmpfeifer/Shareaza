@@ -51,6 +51,8 @@ public:
 	PROTOCOLID		m_nProtocol;
 	Hashes::Guid	m_oClientID;
 	IN_ADDR			m_pAddress;
+	IN_ADDR			m_pRealAddress;
+	IN6_ADDR		m_pRealAddressIPV6;
 	IN6_ADDR		m_pAddressIPv6;
 	CString			m_sCountry;
 	WORD			m_nPort;

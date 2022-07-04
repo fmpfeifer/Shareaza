@@ -152,6 +152,8 @@ CQueryHit* CQueryHit::FromG1Packet(CG1Packet* pPacket, int* pnHops)
 			pHit->m_pAddress	= (IN_ADDR&)nAddress;
 			pHit->m_nRealPort   = pPacket->m_nPort;
 			pHit->m_bUDP        = pPacket->m_bUDP;
+			memcpy(&pHit->m_pRealAddress, &pPacket->m_pSourceAddress, sizeof(pHit->m_pRealAddress));
+			memcpy(&pHit->m_pRealAddressIPV6, &pPacket->m_pSource6Address, sizeof(pHit->m_pRealAddressIPV6));
 			pHit->m_sCountry	= theApp.GetCountryCode( pHit->m_pAddress );
 			pHit->m_nPort		= nPort;
 			pHit->m_nSpeed		= nSpeed;
@@ -668,6 +670,8 @@ CQueryHit* CQueryHit::FromG2Packet(CG2Packet* pPacket, int* pnHops)
 		pHit->m_bPreview	&= pHit->m_bPush == TRI_FALSE;
 		pHit->m_nRealPort   = pPacket->m_nPort;
 		pHit->m_bUDP        = pPacket->m_bUDP;
+		memcpy(&pHit->m_pRealAddress, &pPacket->m_pSourceAddress, sizeof(pHit->m_pRealAddress));
+		memcpy(&pHit->m_pRealAddressIPV6, &pPacket->m_pSource6Address, sizeof(pHit->m_pRealAddressIPV6));
 
 		LogDebugMessage("QH from G2Packet. Port: ", (long) pHit->m_nPort);
 		LogDebugMessage("QH from G2Packet. Real Port: ", (long) pHit->m_nRealPort);
@@ -1981,6 +1985,9 @@ CQueryHit& CQueryHit::operator=(const CQueryHit& pOther)
 	m_nRealPort     = pOther.m_nRealPort;
 	m_bUDP          = pOther.m_bUDP;
 
+	m_pRealAddress = pOther.m_pRealAddress;
+	m_pRealAddressIPV6 = pOther.m_pRealAddressIPV6;
+
 	return *this;
 }
 
@@ -2069,6 +2076,8 @@ void CQueryHit::Serialize(CArchive& ar, int nVersion /* MATCHLIST_SER_VERSION */
 		ar << m_sNick;
 		ar << m_nRealPort;
 		ar << m_bUDP;
+		ar.Write(&m_pRealAddress, sizeof(IN_ADDR));
+		ar.Write(&m_pRealAddressIPV6, sizeof(IN6_ADDR));
 	}
 	else
 	{
@@ -2151,6 +2160,8 @@ void CQueryHit::Serialize(CArchive& ar, int nVersion /* MATCHLIST_SER_VERSION */
 		if ( nVersion >= 18 ) {
 			ar >> m_nRealPort;
 			ar >> m_bUDP;
+			ReadArchive(ar, &m_pRealAddress, sizeof(IN_ADDR));
+			ReadArchive(ar, &m_pRealAddressIPV6, sizeof(IN6_ADDR));
 		}
 
 		if ( m_nHitSources == 0 && m_sURL.GetLength() ) m_nHitSources = 1;

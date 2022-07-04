@@ -47,7 +47,11 @@ public:
 
 	// The network this packet is on, like Gnutella or eDonkey2000
 	PROTOCOLID m_nProtocol;
+
+	// Packet header info
 	WORD	   m_nPort;
+	IN_ADDR	   m_pSourceAddress;
+	IN6_ADDR   m_pSource6Address;
 
 	// List pointer and reference count
 	CPacket* m_pNext;      // Unused packets in the packet pool are linked together from m_pFree, through each packet's m_pNext pointer

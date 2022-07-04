@@ -62,6 +62,8 @@ CPacket::CPacket(PROTOCOLID nProtocol)
 	, m_nNeighbourUnique	( NULL )
 	, m_nPort 	   ( 0 )
 {
+	memset(&m_pSourceAddress, 0, sizeof(m_pSourceAddress));
+	memset(&m_pSource6Address, 0, sizeof(m_pSource6Address));
 }
 
 // Delete this CPacket object
@@ -464,6 +466,7 @@ void CPacket::SmartDump(const SOCKADDR_IN* pAddress, BOOL bUDP, BOOL bOutgoing, 
 	m_bOutgoing = bOutgoing;
 	m_nNeighbourUnique = nNeighbourUnique;
 	m_nPort = ntohs(pAddress->sin_port);
+	memcpy(&m_pSourceAddress, &pAddress->sin_addr, sizeof(m_pSourceAddress));
 	LogDebugMessage("SmartDump: ", pAddress);
 
 	if ( theApp.m_pPacketWnd )
@@ -478,6 +481,7 @@ void CPacket::SmartDump(const SOCKADDR_IN6* pAddress, BOOL bUDP, BOOL bOutgoing,
 	m_bOutgoing = bOutgoing;
 	m_nNeighbourUnique = nNeighbourUnique;
 	m_nPort = ntohs(pAddress->sin6_port);
+	memcpy(&m_pSource6Address, &pAddress->sin6_addr, sizeof(m_pSource6Address));
 
 	if ( theApp.m_pPacketWnd )
 	{
