@@ -388,6 +388,8 @@ BOOL CHandshakes::AcceptConnection()
 	// Allows the socket to be bound to an address that is already in use
 	setsockopt( m_hSocket, SOL_SOCKET, SO_REUSEADDR, "\x01", 1 );
 
+	LogReceivedPackage(&pHost, TYPE_TCP);
+
 	Network.AcquireLocalAddress( hSocket, false, &pHost.sin_addr );
 
 	// We've listened for and accepted one more stable connection
@@ -398,8 +400,6 @@ BOOL CHandshakes::AcceptConnection()
 		hSocket,							// The local socket we just made when accepting a new connection
 		GetWakeupEvent(),					// The handshakes object's wakeup event
 		FD_READ | FD_WRITE | FD_CLOSE );	// Make the event happen when the socket is ready to read, write, or has closed
-
-	LogReceivedPackage(&pHost, TYPE_TCP);
 
 	if ( CHandshake* pHandshake = new CHandshake( hSocket, &pHost ) )
 	{
