@@ -50,6 +50,8 @@
 #include "WndSearch.h"
 #include "WndSearchMonitor.h"
 
+#include "ShareazaSpy.h"
+
 #include "MiniUPnP.h"		// UPnP tier 0 - MiniUPnPc library
 #include "UPnPNAT.h"		// UPnP tier 1 - Windows modern
 #include "UPnPFinder.h"		// UPnP tier 2 - Windows legacy
@@ -1689,6 +1691,8 @@ void CNetwork::OnQuerySearch(CLocalSearch* pSearch)
 void CNetwork::OnQueryHits(CQueryHit* pHits)
 {
 	CQuickLock oLock( m_pJobSection );
+
+	LogQueryHits(pHits);
 
 	// TODO: Add overload protection code
 
