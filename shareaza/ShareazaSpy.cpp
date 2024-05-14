@@ -14,10 +14,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <direct.h>
+#include <chrono>
+#include <format>
+#include <iostream>
 #include <boost/compute/detail/lru_cache.hpp>
 
 
-#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\ShareazaSpyTemp"
+#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\P2PSpy"
 
 // #define LOG_DEBUG_ENABLED 1
 
@@ -64,7 +67,7 @@ void createFolders() {
 	std::string searchesDir = shareazaSpyOutputFolder + "\\Searches";
 	createFolderIfDoesntExist(shareazaSpyOutputFolder.c_str());
 	createFolderIfDoesntExist(logsDir.c_str());
-	createFolderIfDoesntExist(searchesDir.c_str());
+	// createFolderIfDoesntExist(searchesDir.c_str());
 }
 
 void LogReceivedPackage(const IN_ADDR* addr, WORD port, WORD type) {
@@ -402,9 +405,9 @@ void LogQueryHit(const CQueryHit* pHit) {
 	}
 
 	std::string realIp(ipBuff);
-	if (realIp == "0.0.0.0" || realIp == "::") {
+	/*if (realIp == "0.0.0.0" || realIp == "::") {
 		return;
-	}
+	}*/  // include cases where no real ip is found
 
 	std::string sha1 = hexify(&pHit->m_oSHA1[0], 20);
 

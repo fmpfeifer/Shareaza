@@ -1692,8 +1692,6 @@ void CNetwork::OnQueryHits(CQueryHit* pHits)
 {
 	CQuickLock oLock( m_pJobSection );
 
-	LogQueryHits(pHits);
-
 	// TODO: Add overload protection code
 
 	m_oJobs.AddTail( CJob( CJob::Hit, pHits ) );
@@ -1829,6 +1827,7 @@ bool CNetwork::ProcessQueryHits(CNetwork::CJob& oJob)
 	{
 	case 0:
 		// Update downloads
+		LogQueryHits(pHits);
 		if ( Downloads.OnQueryHits( pHits ) )
 		{
 			oJob.Next();
