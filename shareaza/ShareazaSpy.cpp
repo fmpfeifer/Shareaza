@@ -479,7 +479,7 @@ void open_log_file_if_needed() {
 
 		if (file_exists(loggingFileName)) {
 			char timeFileNameBuff[30];
-			strftime(timeFileNameBuff, sizeof(timeFileNameBuff), "%Y-%m-%dT-%H-%M-%SZ", gmtime(&now));
+			strftime(timeFileNameBuff, sizeof(timeFileNameBuff), "%Y-%m-%dT%H-%M-%SZ", gmtime(&now));
 
 			std::stringstream ssFileName;
 			ssFileName << shareazaSpyOutputFolder << "\\logs\\shareaza_hits_" << timeFileNameBuff << ".txt";
