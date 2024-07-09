@@ -407,7 +407,7 @@ BOOL CG2Neighbour::OnPacket(CG2Packet* pPacket)
 	if ( IsIPv6Host() )
 		pPacket->SmartDump( &m_pHostIPv6, FALSE, FALSE, (DWORD_PTR)this );
 	else
-		pPacket->SmartDump( &m_pHost, FALSE, FALSE, (DWORD_PTR)this );
+		pPacket->SmartDumpPort( &m_pHost, FALSE, FALSE, (DWORD_PTR)this, m_nRealPort );
 
 	if ( Network.RoutePacket( pPacket ) )
 		return TRUE;

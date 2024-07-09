@@ -20,7 +20,8 @@
 #include <boost/compute/detail/lru_cache.hpp>
 
 
-#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\P2PSpy"
+// #define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\P2PSpy"
+#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\ShareazaSpyTemp"
 
 // #define LOG_DEBUG_ENABLED 1
 
@@ -80,13 +81,19 @@ void LogReceivedPackage(const IN_ADDR* addr, WORD port, WORD type) {
 	#endif
 }
 
+static bool openFile = true;
+
 void LogReceivedPackage(const SOCKADDR_IN* addr, WORD type)
 {
 	#if 0
+
+	//if (type == TYPE_UDP)
+	//	return;
+
 	CSingleLock lock(&cslock, TRUE);
-	if (!outputFolderSet) {
+	/*if (!outputFolderSet) {
 		return;
-	}
+	}*/
 
 	// create new file if MAX_LOG_PER_FILE lines is reached
 	if (logCount >= MAX_LOG_PER_FILE) {
@@ -497,7 +504,7 @@ void open_log_file_if_needed() {
 
 void LogQueryHits(const CQueryHit* pHits) {
 	CSingleLock lock(&cslock, TRUE);
-	if (!outputFolderSet || !pHits) {
+	if (/*!outputFolderSet ||*/ !pHits) {
 		return;
 	}
 

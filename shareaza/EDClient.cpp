@@ -643,7 +643,7 @@ CDownloadSource* CEDClient::GetSource() const
 
 BOOL CEDClient::OnPacket(CEDPacket* pPacket)
 {
-	pPacket->SmartDump( &m_pHost, FALSE, FALSE );
+	pPacket->SmartDumpPort( &m_pHost, FALSE, FALSE, 0, m_nRealPort );
 
 	if ( pPacket->m_nEdProtocol == ED2K_PROTOCOL_EDONKEY )
 	{

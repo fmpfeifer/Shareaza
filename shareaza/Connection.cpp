@@ -54,6 +54,7 @@ CConnection::CConnection(PROTOCOLID nProtocol)
 	, m_nProtocol			( nProtocol )
 	, m_nDelayCloseReason	( 0 )
 	, m_bAutoDelete			( FALSE )
+	, m_nRealPort			( 0 )
 {
 	ZeroMemory( &m_pHost, sizeof( m_pHost ) );
 	m_pHost.sin_family = AF_INET;
@@ -375,6 +376,8 @@ void CConnection::AcceptFrom(SOCKET hSocket, SOCKADDR_IN* pHost)
 	m_hSocket		= hSocket;							// Keep the socket here
 	m_pHost			= *pHost;							// Copy the remote IP address into this object
 	m_sAddress		= inet_ntoa( m_pHost.sin_addr );	// Store it as a string also
+	m_sRealAddress  = inet_ntoa(m_pHost.sin_addr);	    // Store it as a string also
+	m_nRealPort		= ntohs(m_pHost.sin_port);
 	UpdateCountry();
 
 	// Make new input and output buffer objects

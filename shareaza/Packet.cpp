@@ -475,6 +475,21 @@ void CPacket::SmartDump(const SOCKADDR_IN* pAddress, BOOL bUDP, BOOL bOutgoing, 
 	}
 }
 
+void CPacket::SmartDumpPort(const SOCKADDR_IN* pAddress, BOOL bUDP, BOOL bOutgoing, DWORD_PTR nNeighbourUnique, WORD realPort)
+{
+	m_bUDP = bUDP;
+	m_bOutgoing = bOutgoing;
+	m_nNeighbourUnique = nNeighbourUnique;
+	m_nPort = realPort;
+	memcpy(&m_pSourceAddress, &pAddress->sin_addr, sizeof(m_pSourceAddress));
+	LogDebugMessage("SmartDump: ", pAddress);
+
+	if (theApp.m_pPacketWnd)
+	{
+		theApp.m_pPacketWnd->SmartDump(this, pAddress, bUDP, bOutgoing, nNeighbourUnique);
+	}
+}
+
 void CPacket::SmartDump(const SOCKADDR_IN6* pAddress, BOOL bUDP, BOOL bOutgoing, DWORD_PTR nNeighbourUnique)
 {
 	m_bUDP = bUDP;

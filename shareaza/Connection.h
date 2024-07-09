@@ -51,6 +51,8 @@ public:
 	BOOL		m_bClientExtended;// Does the remote computer support extended functions i.e. running under Shareaza or compatible mod? In practice, this means can we use chat, browse, etc...
 	CString		m_sLastHeader;	// The handshake header that ReadHeaders most recently read
 	PROTOCOLID	m_nProtocol;	// Detected protocol
+	CString     m_sRealAddress;
+	int			m_nRealPort;
 
 // Buffers access
 protected:

@@ -336,7 +336,7 @@ BOOL CG1Neighbour::OnPacket(CG1Packet* pPacket)
 	}
 
 	// Show this packet to all the windows on the tab bar
-	pPacket->SmartDump( &m_pHost, FALSE, FALSE, (DWORD_PTR)this );
+	pPacket->SmartDumpPort( &m_pHost, FALSE, FALSE, (DWORD_PTR)this, m_nRealPort );
 
 	// Sort the packet by type, hand it to the correct packet handler, and return the result from that
 	switch ( pPacket->m_nType )

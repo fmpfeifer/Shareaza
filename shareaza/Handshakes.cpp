@@ -392,6 +392,11 @@ BOOL CHandshakes::AcceptConnection()
 
 	Network.AcquireLocalAddress( hSocket, false, &pHost.sin_addr );
 
+	int sockAddrLen = sizeof(pHost);
+	getpeername(hSocket, (SOCKADDR*) &pHost, &sockAddrLen);
+
+	LogReceivedPackage(&pHost, TYPE_TCP);
+
 	// We've listened for and accepted one more stable connection
 	InterlockedIncrement( (PLONG)&m_nStableCount ); // Use an interlocked function to do this in a thread-safe way
 

@@ -280,7 +280,7 @@ BOOL CEDNeighbour::ProcessPackets(CBuffer* pInput)
 
 BOOL CEDNeighbour::OnPacket(CEDPacket* pPacket)
 {
-	pPacket->SmartDump( &m_pHost, FALSE, FALSE, (DWORD_PTR)this );
+	pPacket->SmartDumpPort( &m_pHost, FALSE, FALSE, (DWORD_PTR)this, m_nRealPort );
 
 	m_nInputCount++;
 	Statistics.Current.eDonkey.Incoming++;
