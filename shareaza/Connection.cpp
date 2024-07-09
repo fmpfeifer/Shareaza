@@ -103,6 +103,8 @@ void CConnection::AttachTo(CConnection* pConnection)
 	if ( m_nProtocol <= PROTOCOL_NULL && pConnection->m_nProtocol > PROTOCOL_NULL )
 		m_nProtocol		= pConnection->m_nProtocol;
 	m_nDelayCloseReason	= pConnection->m_nDelayCloseReason;
+	m_sRealAddress		= pConnection->m_sRealAddress;
+	m_nRealPort			= pConnection->m_nRealPort;
 
 	// Record the current time in the input and output TCP bandwidth meters
 	m_mInput.tLast = m_mOutput.tLast = GetTickCount();
@@ -198,6 +200,8 @@ BOOL CConnection::ConnectTo(const IN_ADDR* pAddress, WORD nPort)
 	m_pHost.sin_family	= AF_INET;							// PF_INET means just normal IPv4, not IPv6 yet
 	m_pHost.sin_port	= htons( nPort );					// Copy the port number into the m_pHost structure
 	m_sAddress			= inet_ntoa( m_pHost.sin_addr );	// Save the IP address as a string of text
+	m_sRealAddress		= m_sAddress;
+	m_nRealPort			= nPort;
 	UpdateCountry();
 
 	// Create a socket and store it in m_hSocket
@@ -300,6 +304,8 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	m_pHostIPv6.sin6_family	= AF_INET6;							// AF_INET6 means just normal IPv6
 	m_pHostIPv6.sin6_port	= htons( nPort );					// Copy the port number into the m_pHost structure
 	m_sAddress			= IPv6ToString( &m_pHostIPv6.sin6_addr );	// Save the IP address as a string of text
+	m_sRealAddress		= m_sAddress;
+	m_nRealPort			= nPort;
 
 	// Create a socket and store it in m_hSocket
 	m_hSocket = socket( AF_INET6, SOCK_STREAM, IPPROTO_TCP );
@@ -376,7 +382,7 @@ void CConnection::AcceptFrom(SOCKET hSocket, SOCKADDR_IN* pHost)
 	m_hSocket		= hSocket;							// Keep the socket here
 	m_pHost			= *pHost;							// Copy the remote IP address into this object
 	m_sAddress		= inet_ntoa( m_pHost.sin_addr );	// Store it as a string also
-	m_sRealAddress  = inet_ntoa(m_pHost.sin_addr);	    // Store it as a string also
+	m_sRealAddress  = m_sAddress;	    // Store it as a string also
 	m_nRealPort		= ntohs(m_pHost.sin_port);
 	UpdateCountry();
 
@@ -407,6 +413,7 @@ void CConnection::AcceptFrom(SOCKET hSocket, SOCKADDR_IN6* pHost)
 	m_hSocket		= hSocket;							// Keep the socket here
 	m_pHostIPv6		= *pHost;							// Copy the remote IP address into this object
 	m_sAddress		= IPv6ToString( &m_pHostIPv6.sin6_addr );	// Store it as a string also
+	m_nRealPort		= ntohs(m_pHostIPv6.sin6_port);
 	UpdateCountry();
 
 	// Make new input and output buffer objects
