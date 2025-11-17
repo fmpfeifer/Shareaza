@@ -326,9 +326,11 @@ BOOL CManagedSearch::ExecuteNeighbours(const DWORD tTicks, const DWORD tSecs)
 					if ( nTTL >= pNeighbour->GetMaxTTL() )
 						// X-Max-TTL reached
 						continue;
-					if ( m_nHits >= Settings.Gnutella.MaxResults )
-						// Maximum hits reached
-						continue;
+					// NOTE: Original behaviour (before monitoring-only build) also stopped probing
+					// when total hits reached Settings.Gnutella.MaxResults:
+					// if ( m_nHits >= Settings.Gnutella.MaxResults )
+					// 	// Maximum hits reached
+					// 	continue;
 					nTTL++;
 				}
 				else

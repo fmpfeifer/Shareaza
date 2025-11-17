@@ -475,11 +475,15 @@ void CSearchWnd::OnSearchSearch()
 			m_bWaitMore = FALSE;
 
 			//Resume G2 search
-			m_nMaxResults = m_pMatches->m_nGnutellaHits + Settings.Gnutella.MaxResults;
-			m_nMaxQueryCount = pManaged->m_nQueryCount + Settings.Gnutella2.QueryLimit;
+			// NOTE: Original behaviour (before monitoring-only build) used configurable limits:
+			// m_nMaxResults = m_pMatches->m_nGnutellaHits + Settings.Gnutella.MaxResults;
+			// m_nMaxQueryCount = pManaged->m_nQueryCount + Settings.Gnutella2.QueryLimit;
+			m_nMaxResults = 0;
+			m_nMaxQueryCount = 0;
 
 			//Resume ED2K search
-			m_nMaxED2KResults = m_pMatches->m_nED2KHits + Settings.eDonkey.MaxResults;
+			// m_nMaxED2KResults = m_pMatches->m_nED2KHits + Settings.eDonkey.MaxResults;
+			m_nMaxED2KResults = 0;
 			pManaged->m_tLastED2K = GetTickCount();
 			pManaged->m_tMoreResults = 0;
 
@@ -695,9 +699,13 @@ void CSearchWnd::ExecuteSearch()
 				pManaged->Stop();
 				pManaged->Start();
 
-				m_nMaxResults = m_pMatches->m_nGnutellaHits + Settings.Gnutella.MaxResults;
-				m_nMaxED2KResults = m_pMatches->m_nED2KHits + Settings.eDonkey.MaxResults;
-				m_nMaxQueryCount = pManaged->m_nQueryCount + Settings.Gnutella2.QueryLimit;
+				// NOTE: Original behaviour (before monitoring-only build) initialized per-search limits:
+				// m_nMaxResults = m_pMatches->m_nGnutellaHits + Settings.Gnutella.MaxResults;
+				// m_nMaxED2KResults = m_pMatches->m_nED2KHits + Settings.eDonkey.MaxResults;
+				// m_nMaxQueryCount = pManaged->m_nQueryCount + Settings.Gnutella2.QueryLimit;
+				m_nMaxResults = 0;
+				m_nMaxED2KResults = 0;
+				m_nMaxQueryCount = 0;
 
 				m_wndPanel.Disable();
 
@@ -835,7 +843,11 @@ BOOL CSearchWnd::OnQueryHits(const CQueryHit* pHits)
 
 				SetModified();
 
-				if ( ( m_pMatches->m_nED2KHits >= m_nMaxED2KResults ) &&
+				// NOTE: Original behaviour (before monitoring-only build) always enforced ED2K max results:
+				// if ( ( m_pMatches->m_nED2KHits >= m_nMaxED2KResults ) &&
+				// 	 ( (*pManaged)->m_tLastED2K != 0xFFFFFFFF ) )
+				if ( m_nMaxED2KResults &&
+					 ( m_pMatches->m_nED2KHits >= m_nMaxED2KResults ) &&
 					 ( (*pManaged)->m_tLastED2K != 0xFFFFFFFF ) )
 				{
 					if ( ! (*pManaged)->m_bAllowG2 ) //If G2 is not active, pause the search now.
@@ -847,7 +859,9 @@ BOOL CSearchWnd::OnQueryHits(const CQueryHit* pHits)
 					theApp.Message( MSG_DEBUG, _T("ED2K Search Reached Maximum Number of Files") );
 				}
 #ifndef LAN_MODE
-				if ( !m_bWaitMore && ( m_pMatches->m_nGnutellaHits >= m_nMaxResults ) )
+				// NOTE: Original behaviour enforced Gnutella max results unconditionally:
+				// if ( !m_bWaitMore && ( m_pMatches->m_nGnutellaHits >= m_nMaxResults ) )
+				if ( m_nMaxResults && !m_bWaitMore && ( m_pMatches->m_nGnutellaHits >= m_nMaxResults ) )
 				{
 					m_bWaitMore = TRUE;
 					(*pManaged)->SetActive( FALSE );
@@ -874,7 +888,7 @@ void CSearchWnd::OnTimer(UINT_PTR nIDEvent)
 
 		if ( pManaged )
 		{
-			if ( pManaged->IsActive() &&
+			if ( m_nMaxQueryCount && pManaged->IsActive() &&
 				 pManaged->m_nQueryCount > m_nMaxQueryCount )
 			{
 				m_bWaitMore = TRUE;
