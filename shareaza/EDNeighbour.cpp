@@ -708,112 +708,124 @@ BOOL CEDNeighbour::SendLogin()
 // be sent.
 BOOL CEDNeighbour::SendSharedFiles()
 {
-	bool bDeflate = ( m_nTCPFlags & ED2K_SERVER_TCP_DEFLATE ) != 0;
-
-	// Set the limits for number of files sent to the ed2k server
-	m_nFileLimit = Settings.eDonkey.MaxShareCount;
-
-	{
-		CQuickLock oLock( HostCache.eDonkey.m_pSection );
-
-		CHostCacheHost *pServer = HostCache.eDonkey.Find( &m_pHost.sin_addr );
-		if ( pServer && ( pServer->m_nFileLimit > 10 ) )
-		{
-			m_nFileLimit = min( m_nFileLimit, pServer->m_nFileLimit );
-		}
-	}
-
-	CEDPacket* pPacket = CEDPacket::New( ED2K_C2S_OFFERFILES );
-	if ( ! pPacket )
-		// Out of memory
-		return FALSE;
-
-	m_nFilesSent = 0;
-
-	pPacket->WriteLongLE( m_nFilesSent );		//Write number of files. (update this later)
-
-	// Send files on download list to ed2k server (partials)
-	{
-		CQuickLock oLock( Transfers.m_pSection );
-
-		for ( POSITION pos = Downloads.GetIterator() ; pos != NULL && ( m_nFilesSent < m_nFileLimit ) ; )
-		{
-			const CDownload* pDownload = Downloads.GetNext( pos );
-			const QWORD nSize = pDownload->m_nSize;
-
-			if ( ( pDownload->m_oED2K ) &&
-				 ( IsGoodSize( nSize ) ) &&
-				 ( pDownload->IsStarted() ) &&
-				 ( ! pDownload->NeedHashset() ) &&
-				 ( ! pDownload->IsMoving() ) )
-			{
-				pPacket->WriteFile( pDownload, nSize, NULL, this, TRUE );
-
-				m_nFilesSent++;
-			}
-		}
-	}
-
-	// Send files in library to ed2k server (Complete files)
-	{
-		CQuickLock oLock( Library.m_pSection );
-
-		for ( POSITION pos = LibraryMaps.GetFileIterator() ; pos != NULL && ( m_nFilesSent < m_nFileLimit ) ; )
-		{
-			const CLibraryFile* pFile = LibraryMaps.GetNextFile( pos );
-			const QWORD nSize = pFile->GetSize();
-
-			if ( ( pFile->m_oED2K ) &&
-				 ( pFile->IsShared() ) &&
-				 ( IsGoodSize( nSize ) ) &&
-				 ( UploadQueues.CanUpload( PROTOCOL_ED2K, pFile ) ) )
-			{
-				// Send the file to the ed2k server
-				pPacket->WriteFile( pFile, nSize, NULL, this, FALSE );
-
-				m_nFilesSent++;
-			}
-		}
-	}
-
-	*(DWORD*)pPacket->m_pBuffer = m_nFilesSent;	// Correct the number of files sent
-
-	// Compress if the server supports it
-	pPacket->m_bDeflate = bDeflate;
-
-	return Send( pPacket );	// Send the packet
+	// NOTE: Original behaviour (before monitoring-only modification) sent the list of
+	// shared files (partials and complete) to the ED2K server using ED2K_C2S_OFFERFILES:
+	//	bool bDeflate = ( m_nTCPFlags & ED2K_SERVER_TCP_DEFLATE ) != 0;
+	//
+	//	// Set the limits for number of files sent to the ed2k server
+	//	m_nFileLimit = Settings.eDonkey.MaxShareCount;
+	//
+	//	{
+	//		CQuickLock oLock( HostCache.eDonkey.m_pSection );
+	//
+	//		CHostCacheHost *pServer = HostCache.eDonkey.Find( &m_pHost.sin_addr );
+	//		if ( pServer && ( pServer->m_nFileLimit > 10 ) )
+	//		{
+	//			m_nFileLimit = min( m_nFileLimit, pServer->m_nFileLimit );
+	//		}
+	//	}
+	//
+	//	CEDPacket* pPacket = CEDPacket::New( ED2K_C2S_OFFERFILES );
+	//	if ( ! pPacket )
+	//		// Out of memory
+	//		return FALSE;
+	//
+	//	m_nFilesSent = 0;
+	//
+	//	pPacket->WriteLongLE( m_nFilesSent );		//Write number of files. (update this later)
+	//
+	//	// Send files on download list to ed2k server (partials)
+	//	{
+	//		CQuickLock oLock( Transfers.m_pSection );
+	//
+	//		for ( POSITION pos = Downloads.GetIterator() ; pos != NULL && ( m_nFilesSent < m_nFileLimit ) ; )
+	//		{
+	//			const CDownload* pDownload = Downloads.GetNext( pos );
+	//			const QWORD nSize = pDownload->m_nSize;
+	//
+	//			if ( ( pDownload->m_oED2K ) &&
+	//				 ( IsGoodSize( nSize ) ) &&
+	//				 ( pDownload->IsStarted() ) &&
+	//				 ( ! pDownload->NeedHashset() ) &&
+	//				 ( ! pDownload->IsMoving() ) )
+	//			{
+	//				pPacket->WriteFile( pDownload, nSize, NULL, this, TRUE );
+	//
+	//				m_nFilesSent++;
+	//			}
+	//		}
+	//	}
+	//
+	//	// Send files in library to ed2k server (Complete files)
+	//	{
+	//		CQuickLock oLock( Library.m_pSection );
+	//
+	//		for ( POSITION pos = LibraryMaps.GetFileIterator() ; pos != NULL && ( m_nFilesSent < m_nFileLimit ) ; )
+	//		{
+	//			const CLibraryFile* pFile = LibraryMaps.GetNextFile( pos );
+	//			const QWORD nSize = pFile->GetSize();
+	//
+	//			if ( ( pFile->m_oED2K ) &&
+	//				 ( pFile->IsShared() ) &&
+	//				 ( IsGoodSize( nSize ) ) &&
+	//				 ( UploadQueues.CanUpload( PROTOCOL_ED2K, pFile ) ) )
+	//			{
+	//				// Send the file to the ed2k server
+	//				pPacket->WriteFile( pFile, nSize, NULL, this, FALSE );
+	//
+	//				m_nFilesSent++;
+	//			}
+	//		}
+	//	}
+	//
+	//	*(DWORD*)pPacket->m_pBuffer = m_nFilesSent;	// Correct the number of files sent
+	//
+	//	// Compress if the server supports it
+	//	pPacket->m_bDeflate = bDeflate;
+	//
+	//	return Send( pPacket );	// Send the packet
+	//
+	// For this monitoring build, ED2K server file advertising is disabled so the client
+	// never sends any shared file list to eDonkey/ED2K servers.
+	return TRUE;
 }
 
 // This function adds a download to the ed2k server file list.
 BOOL CEDNeighbour::SendSharedDownload(const CDownloadWithTiger* pDownload)
 {
-	bool bDeflate = ( m_nTCPFlags & ED2K_SERVER_TCP_DEFLATE ) != 0;
-
-	// Don't send this file if we aren't properly connected yet, don't have an ed2k hash/hashset,
-	// or have already sent too many files.
-	if ( m_nState < nrsConnected ) return FALSE;
-	if ( ! pDownload->m_oED2K || pDownload->NeedHashset() ) return FALSE;
-	if ( ! IsGoodSize( pDownload->m_nSize ) ) return FALSE;
-	if ( m_nFilesSent >= m_nFileLimit ) return FALSE;
-
-	CEDPacket* pPacket = CEDPacket::New( ED2K_C2S_OFFERFILES );
-	if ( ! pPacket )
-		// Out of memory
-		return FALSE;
-
-	// Send one file
-	pPacket->WriteLongLE( 1 );
-
-	// Send the file
-	pPacket->WriteFile( pDownload, pDownload->m_nSize, NULL, this, true );
-
-	// Increment the number of files sent
-	m_nFilesSent ++;
-
-	// Compress if the server supports it
-	pPacket->m_bDeflate = bDeflate;
-
-	return Send( pPacket );
+	// NOTE: Original behaviour (before monitoring-only modification) advertised individual
+	// downloads to the ED2K server as ED2K_C2S_OFFERFILES packets:
+	//	bool bDeflate = ( m_nTCPFlags & ED2K_SERVER_TCP_DEFLATE ) != 0;
+	//
+	//	// Don't send this file if we aren't properly connected yet, don't have an ed2k hash/hashset,
+	//	// or have already sent too many files.
+	//	if ( m_nState < nrsConnected ) return FALSE;
+	//	if ( ! pDownload->m_oED2K || pDownload->NeedHashset() ) return FALSE;
+	//	if ( ! IsGoodSize( pDownload->m_nSize ) ) return FALSE;
+	//	if ( m_nFilesSent >= m_nFileLimit ) return FALSE;
+	//
+	//	CEDPacket* pPacket = CEDPacket::New( ED2K_C2S_OFFERFILES );
+	//	if ( ! pPacket )
+	//		// Out of memory
+	//		return FALSE;
+	//
+	//	// Send one file
+	//	pPacket->WriteLongLE( 1 );
+	//
+	//	// Send the file
+	//	pPacket->WriteFile( pDownload, pDownload->m_nSize, NULL, this, true );
+	//
+	//	// Increment the number of files sent
+	//	m_nFilesSent ++;
+	//
+	//	// Compress if the server supports it
+	//	pPacket->m_bDeflate = bDeflate;
+	//
+	//	return Send( pPacket );
+	//
+	// For this monitoring build, incremental ED2K server file advertising is disabled so the
+	// client never advertises individual downloads to eDonkey/ED2K servers.
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////

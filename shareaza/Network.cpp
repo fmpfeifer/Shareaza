@@ -1793,19 +1793,31 @@ bool CNetwork::ProcessQuerySearch(CNetwork::CJob& oJob)
 
 	case 1:
 		// Downloads search
-		if ( pSearch->Execute( -1, true, false ) )
-		{
-			oJob.Next();
-		}
-		break;
+		// NOTE: Original behaviour (before monitoring-only modification) executed a local
+		// downloads search and sent query hits back to the network:
+		//	if ( pSearch->Execute( -1, true, false ) )
+		//	{
+		//		oJob.Next();
+		//	}
+		//
+		// For this monitoring build, this code is disabled so the client never returns
+		// local file results (hits) to remote search queries on any network.
+		delete pSearch;
+		return false;
 
 	case 2:
 		// Library search
-		if ( pSearch->Execute( -1, false, true ) )
-		{
-			oJob.Next();
-		}
-		break;
+		// NOTE: Original behaviour (before monitoring-only modification) executed a local
+		// library search over shared files and sent query hits back to the network:
+		//	if ( pSearch->Execute( -1, false, true ) )
+		//	{
+		//		oJob.Next();
+		//	}
+		//
+		// This is also disabled to ensure this build can only monitor incoming
+		// queries and never advertise or share matching local files.
+		delete pSearch;
+		return false;
 	}
 
 	if ( oJob.GetStage() == 3 )
