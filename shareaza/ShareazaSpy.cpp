@@ -20,8 +20,8 @@
 #include <boost/compute/detail/lru_cache.hpp>
 
 
-// #define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\P2PSpy"
-#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\ShareazaSpyTemp"
+#define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\P2PSpy"
+// #define SHAREAZA_SPY_OUTPUT_FOLDER "C:\\ShareazaSpyTemp"
 
 // #define LOG_DEBUG_ENABLED 1
 
